@@ -1,0 +1,42 @@
+name: rngjff
+description: "RNG just for fun"
+publish_to: 'none' 
+
+
+version: 4.1.0+6
+
+environment:
+  sdk: '>=3.4.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  flutter_gen: ^5.6.0
+
+dev_dependencies:
+  build_runner: ^2.4.11
+  flutter_gen_runner: ^5.6.0
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+
+flutter_gen:
+  output: lib/utils/gen/ # Optional (default: lib/gen/)
+  line_length: 80 # Optional (default: 80)
+
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/dice-1.png
+    - assets/images/dice-2.png
+    - assets/images/dice-3.png
+    - assets/images/dice-4.png
+    - assets/images/dice-5.png
+    - assets/images/dice-6.png
