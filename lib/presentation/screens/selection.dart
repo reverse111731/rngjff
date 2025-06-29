@@ -121,7 +121,7 @@ class SelectionPage extends StatelessWidget {
                 );
               },
               child: const Text(
-                "Roulette Board",
+                "Roulette Board Guide",
                 style: TextStyle(fontSize: 32),
               ),
             ),
@@ -136,22 +136,23 @@ class SelectionPage extends StatelessWidget {
                 );
               },
               child: const Text(
-                "Labouchere",
+                "Labouchere System",
                 style: TextStyle(fontSize: 32),
               ),
             ),
             //!--
             TextButton(
               onPressed: () {
+                // showComingSoonModal(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MartingalePage(),
+                    builder: (context) => const MartingaleHomePage(),
                   ),
                 );
               },
               child: const Text(
-                "Martingale",
+                "Martingale System",
                 style: TextStyle(fontSize: 32),
               ),
             ),
@@ -160,4 +161,20 @@ class SelectionPage extends StatelessWidget {
       ),
     );
   }
+}
+
+void showComingSoonModal(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Coming Soon'),
+      content: const Text('This feature is coming soon!'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
 }

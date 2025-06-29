@@ -32,12 +32,33 @@ class _FibonacciListPageState extends State<FibonacciListPage> {
   }
 
   void compute() {
-    final String inputUnit = unitController.text.trim();
-    final int parsedUnit = int.tryParse(inputUnit)!;
+    if (unitController.text.isNotEmpty) {
+      final String inputUnit = unitController.text.trim();
+      final int parsedUnit = int.tryParse(inputUnit)!;
 
-    setState(() {
-      unit = parsedUnit;
-    });
+      setState(() {
+        unit = parsedUnit;
+      });
+    } else {
+      showComingSoonModal(context);
+    }
+  }
+
+  void showComingSoonModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter a number'),
+        content:
+            const Text('You have not placed a number to compute Fibonacci.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   // Listener for scroll events

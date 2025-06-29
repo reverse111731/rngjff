@@ -95,7 +95,7 @@ class RandomNumberGeneratorState extends State<RandomNumberGenerator> {
                     [0, 1, 2, 3, 4, 5].map<DropdownMenuItem<int>>((int value) {
                   return DropdownMenuItem<int>(
                     value: value,
-                    child: Text('$value digits'),
+                    child: Text('${value == 0 ? 'N' : value} - digits'),
                   );
                 }).toList(),
               ),

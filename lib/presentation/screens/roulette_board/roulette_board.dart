@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'roulete_dialog.dart';
 
 // Widget to display the Roulette Board
-class RouletteBoardPage extends StatelessWidget {
+class RouletteBoardPage extends StatefulWidget {
   const RouletteBoardPage({super.key});
+
+  @override
+  State<RouletteBoardPage> createState() => _RouletteBoardPageState();
+}
+
+class _RouletteBoardPageState extends State<RouletteBoardPage> {
+  bool doubleZeroEnabled = false;
 
   // Helper function to get the color for a roulette number
   Color _getNumberColor(int number) {
@@ -14,9 +22,9 @@ class RouletteBoardPage extends StatelessWidget {
     // Black: 2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35
     if ([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
         .contains(number)) {
-      return Colors.red.shade700;
+      return Colors.red;
     }
-    return Colors.black87; // Default to black for others
+    return Colors.black; // Default to black for others
   }
 
   // Helper widget to build individual number cells
@@ -120,16 +128,60 @@ class RouletteBoardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRules({String text = 'Rules'}) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-      ),
+  Widget _buildRules({String text = 'Rules', VoidCallback? onTap}) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.info_outline),
+          onPressed: onTap,
+          color: Colors.blue.shade900,
+        ),
+      ],
     );
   }
+
+  // Widget _buildToggleZero() {
+  //   return StatefulBuilder(
+  //     builder: (context, setState) {
+  //       return Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //         child: Row(
+  //           children: [
+  //             const Text(
+  //               'Double 0 layout',
+  //               style: TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //                 fontSize: 24,
+  //               ),
+  //             ),
+  //             const SizedBox(width: 12),
+  //             Switch(
+  //               value: doubleZeroEnabled,
+  //               onChanged: (bool value) {
+  //                 setState(() {
+  //                   doubleZeroEnabled = value;
+  //                   setState(() {});
+  //                 });
+  //               },
+  //               activeColor: Colors.green.shade900,
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +195,7 @@ class RouletteBoardPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Roulette Board',
+        title: const Text('Roulette Board Guide',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -153,7 +205,7 @@ class RouletteBoardPage extends StatelessWidget {
         backgroundColor: Colors.green.shade900,
       ),
       backgroundColor:
-          Colors.green.shade200, // Light green background for the app
+          Colors.green.shade300, // Light green background for the app
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal, // Enables horizontal scrolling
         child: Row(
@@ -163,8 +215,17 @@ class RouletteBoardPage extends StatelessWidget {
             // --- 0 section---
             Column(
               children: [
-                _buildNumberCell('0', _getNumberColor(0),
-                    height: greenCellCombinedHeight),
+                // _buildNumberCell('0', _getNumberColor(0),
+                //     height: greenCellCombinedHeight),
+                if (doubleZeroEnabled) ...[
+                  _buildNumberCell('0', _getNumberColor(0),
+                      height: greenCellCombinedHeight / 2.1),
+                  _buildNumberCell('00', _getNumberColor(37),
+                      height: greenCellCombinedHeight / 2.1),
+                ] else ...[
+                  _buildNumberCell('0', _getNumberColor(0),
+                      height: greenCellCombinedHeight),
+                ]
               ],
             ),
 
@@ -216,9 +277,9 @@ class RouletteBoardPage extends StatelessWidget {
                         width: 120, height: cellSize),
                     _buildOutsideBetCell('EVEN', Colors.blueGrey.shade800,
                         width: 120, height: cellSize),
-                    _buildOutsideBetCell('RED', Colors.red.shade700,
+                    _buildOutsideBetCell('RED', Colors.red,
                         width: 120, height: cellSize),
-                    _buildOutsideBetCell('BLACK', Colors.black87,
+                    _buildOutsideBetCell('BLACK', Colors.black,
                         width: 120, height: cellSize),
                     _buildOutsideBetCell('ODD', Colors.blueGrey.shade800,
                         width: 120, height: cellSize),
@@ -226,17 +287,34 @@ class RouletteBoardPage extends StatelessWidget {
                         width: 120, height: cellSize),
                   ],
                 ),
-
+                SizedBox(height: 24),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildRules(text: 'Straight Up 35:1'),
-                    _buildRules(text: 'Split 17:1'),
-                    _buildRules(text: 'Street 11:1'),
-                    _buildRules(text: 'Corner 8:1'),
-                    _buildRules(text: 'Double Street 5:1'),
-                    _buildRules(text: 'Column & Dozen bets 2:1'),
-                    _buildRules(text: 'Even bets 1:1'),
+                    // _buildToggleZero(),
+                    _buildRules(
+                        text: 'Straight Up 35:1',
+                        onTap: () => showDialogForStriaghtUp(context)),
+                    _buildRules(
+                        text: 'Split 17:1',
+                        onTap: () => showDialogForSplitBet(context)),
+                    _buildRules(
+                        text: 'Street 11:1',
+                        onTap: () => showDialogForStreetBet(context)),
+                    _buildRules(
+                        text: 'Corner 8:1',
+                        onTap: () => showDialogForCornerBet(context)),
+                    _buildRules(
+                        text: 'Double Street or Line 5:1',
+                        onTap: () => showDialogForLineBet(context)),
+                    _buildRules(
+                      text: 'Column & Dozen bets 2:1',
+                      onTap: () => showDialogForDozenColumnBet(context),
+                    ),
+                    _buildRules(
+                      text: 'Outside bets 1:1',
+                      onTap: () => showDialogForOneToOneOutsideBet(context),
+                    ),
                   ],
                 ),
               ],

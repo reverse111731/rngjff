@@ -6,9 +6,10 @@ export 'random_name/random_name_generator.dart';
 export 'random_number/random_number.dart';
 export 'betting_system/fibonacci_list.dart';
 export 'roulette_board/roulette_board.dart';
-export 'betting_system/martingale_list.dart';
+export 'betting_system/martingale.dart';
 export 'betting_system/labouchere.dart';
 
 // General
 export 'selection.dart';
+export 'selection_v2.dart';
 export 'constants.dart';

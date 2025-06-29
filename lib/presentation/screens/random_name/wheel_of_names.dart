@@ -88,7 +88,8 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
         targetSpinIndex = null; // Clear the target index
       });
 
-      showMessage('🎉 $selectedName was selected and removed! 🎉');
+      // showMessage('🎉 $selectedName was selected and removed! 🎉');
+      showComingSoonModal(context, selectedName);
     }
   }
 
@@ -229,12 +230,14 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
                       items: [
                         for (var name in names)
                           FortuneItem(
-                            child: Text(
-                              name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            child: Center(
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             // Optional: Customize item styles
@@ -254,8 +257,8 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
                               Alignment.topCenter, // Alignment of the indicator
                           child: TriangleIndicator(
                             color: Colors.redAccent, // Color of the indicator
-                            width: 50, // Width of the indicator
-                            height: 50, // Height of the indicator
+                            width: 25, // Width of the indicator
+                            height: 25, // Height of the indicator
                           ),
                         ),
                       ],
@@ -267,7 +270,7 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
                       // Set total rotations for a good spin effect
                       rotationCount: 8,
                       // Set total duration for the animation
-                      duration: const Duration(seconds: 5),
+                      duration: const Duration(seconds: 3),
                     ),
             ),
             const SizedBox(height: 16),
@@ -325,6 +328,22 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void showComingSoonModal(BuildContext context, String selectedName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(selectedName),
+        content: const Text('Congratulations!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

@@ -3,7 +3,7 @@ description: "RNG just for fun"
 publish_to: 'none' 
 
 
-version: 4.1.0+6
+version: 5.0.0+1
 
 environment:
   sdk: '>=3.4.4 <4.0.0'

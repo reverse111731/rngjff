@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Exchange gift / Raffle',
+      title: 'Random app Just for Fun',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

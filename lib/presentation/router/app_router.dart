@@ -9,7 +9,7 @@ class AppRouter {
     switch (screens.name) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => const SelectionPage(
+          builder: (_) => const SelectionPageV2(
             title: "Selection Page",
           ),
         );
