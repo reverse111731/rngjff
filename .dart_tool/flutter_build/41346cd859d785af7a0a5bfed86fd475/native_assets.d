@@ -1,1 +1,0 @@
- /home/bogc/Development/rngjff/.dart_tool/flutter_build/41346cd859d785af7a0a5bfed86fd475/native_assets.yaml: 
