@@ -8,6 +8,7 @@ export 'betting_system/fibonacci_list.dart';
 export 'roulette_board/roulette_board.dart';
 export 'betting_system/martingale.dart';
 export 'betting_system/labouchere.dart';
+export 'roulette_board/roulette_wheel.dart';
 
 // General
 export 'selection.dart';

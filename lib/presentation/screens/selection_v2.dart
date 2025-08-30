@@ -60,75 +60,82 @@ class SelectionPageV2 extends StatelessWidget {
         fontSize: 32,
         builder: (context) => const MartingaleHomePage(),
       ),
+      _SelectionItem(
+        label: "Roulette Wheel",
+        fontSize: 32,
+        builder: (context) => const RouletteWheel(),
+      ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        backgroundColor: Colors.grey.shade400,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            iconSize: 32,
-            color: Colors.black,
-            tooltip: 'Reload',
-            onPressed: () {
-              // Reload the screen by rebuilding the widget
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) =>
-                      SelectionPageV2(title: title),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      backgroundColor: Colors.grey.shade200,
-      body: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: GridView.count(
-          crossAxisCount:
-              kIsWeb ? 2 : (Platform.isAndroid || Platform.isIOS ? 1 : 2),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 5,
-          children: items.map((item) {
-            final Color randomColor = Colors
-                .primaries[(items.indexOf(item) + DateTime.now().second) %
-                    Colors.primaries.length]
-                .shade900;
-            return ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: randomColor,
-                foregroundColor:
-                    ThemeData.estimateBrightnessForColor(randomColor) ==
-                            Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
-              ),
+          backgroundColor: Colors.grey.shade400,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              iconSize: 32,
+              color: Colors.black,
+              tooltip: 'Reload',
               onPressed: () {
-                Navigator.push(
+                // Reload the screen by rebuilding the widget
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: item.builder),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        SelectionPageV2(title: title),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                  ),
                 );
               },
-              child: Text(
-                item.label,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: item.fontSize),
-              ),
-            );
-          }).toList(),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.grey.shade200,
+        body: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: GridView.count(
+            crossAxisCount:
+                kIsWeb ? 2 : (Platform.isAndroid || Platform.isIOS ? 1 : 2),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 5,
+            children: items.map((item) {
+              final Color randomColor = Colors
+                  .primaries[(items.indexOf(item) + DateTime.now().second) %
+                      Colors.primaries.length]
+                  .shade900;
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: randomColor,
+                  foregroundColor:
+                      ThemeData.estimateBrightnessForColor(randomColor) ==
+                              Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: item.builder),
+                  );
+                },
+                child: Text(
+                  item.label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: item.fontSize),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
