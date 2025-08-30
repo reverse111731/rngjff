@@ -22,16 +22,8 @@ dev_dependencies:
 
   flutter_lints: 5.0.0
 
-
-flutter_gen:
-  output: lib/utils/gen/ # Optional (default: lib/gen/)
-  line_length: 80 # Optional (default: 80)
-
-
 flutter:
-
   uses-material-design: true
-
   assets:
     - assets/images/dice-1.png
     - assets/images/dice-2.png

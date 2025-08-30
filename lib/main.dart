@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'presentation/index.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set the app to display in edge-to-edge mode
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   runApp(
     MyApp(
       appRouter: AppRouter(),
