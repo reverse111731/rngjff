@@ -38,6 +38,8 @@ class _FibonacciListPageState extends State<FibonacciListPage> {
 
       setState(() {
         unit = parsedUnit;
+        FocusScope.of(context).unfocus();
+        unitController.clear();
       });
     } else {
       showComingSoonModal(context);
@@ -172,11 +174,21 @@ class _FibonacciListPageState extends State<FibonacciListPage> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'F($index): ${_fibNumbers[index].toString()} = ${_fibNumbers[index] * BigInt.from(unit)}',
-                      // Display the Fibonacci number and its index
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.w500),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'F(${index + 1}): ${_fibNumbers[index].toString()} = ${_fibNumbers[index] * BigInt.from(unit)}',
+                          style: TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.w500),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Total capital needed: ${_fibNumbers.sublist(0, index + 1).fold(BigInt.zero, (prev, e) => prev + (e * BigInt.from(unit)))}',
+                          style: TextStyle(
+                              fontSize: 16.0, color: Colors.grey[700]),
+                        ),
+                      ],
                     ),
                   ),
                 );

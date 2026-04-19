@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class MartingaleHomePage extends StatefulWidget {
-  const MartingaleHomePage({super.key});
+class MartingaleListPage extends StatefulWidget {
+  const MartingaleListPage({super.key});
 
   @override
-  State<MartingaleHomePage> createState() => _MartingaleHomePageState();
+  State<MartingaleListPage> createState() => _MartingaleListPageState();
 }
 
-class _MartingaleHomePageState extends State<MartingaleHomePage> {
+class _MartingaleListPageState extends State<MartingaleListPage> {
   int _baseBet = 10;
   int _currentBet = 10;
   int _balance = 1000;

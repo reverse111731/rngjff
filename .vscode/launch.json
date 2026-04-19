@@ -5,26 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "rngjff - any",
+            "name": "rngjff - any debug mode",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "rngjff (debug mode: Android)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "debug",
-            "deviceId": "emulator-5554"
-        },
-        {
-            "name": "rngjff (debug mode: macOS)",
+            "name": "rngjff - debug mode: macOS",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
             "deviceId": "macos"
         },
         {
-            "name": "rngjff (release mode)",
+            "name": "rngjff - any profile mode",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "-v"
+            ]
+        },
+        {
+            "name": "rngjff - any release mode",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

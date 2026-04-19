@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rngjff/presentation/index.dart';
 import 'roulette_dialog.dart';
+import 'roulette_wheel.dart';
 
 // Widget to display the Roulette Board
 class RouletteBoardPage extends StatefulWidget {
@@ -182,9 +182,11 @@ class _RouletteBoardPageState extends State<RouletteBoardPage> {
         backgroundColor: Colors.green.shade900,
         actions: [
           IconButton(
-            icon: Icon(showWheel ? Icons.grid_on : Icons.casino),
+            icon:
+                Icon(showWheel ? Icons.grid_on : Icons.change_circle_outlined),
             tooltip: showWheel ? 'Show Board' : 'Show Wheel',
             onPressed: toggleShowWheel,
+            color: Colors.white,
           ),
         ],
       ),
@@ -201,8 +203,6 @@ class _RouletteBoardPageState extends State<RouletteBoardPage> {
                   // --- 0 section---
                   Column(
                     children: [
-                      // _buildNumberCell('0', _getNumberColor(0),
-                      //     height: greenCellCombinedHeight),
                       if (doubleZeroEnabled) ...[
                         _buildNumberCell('0', _getNumberColor(0),
                             height: greenCellCombinedHeight / 2.1),

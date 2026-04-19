@@ -73,6 +73,8 @@ class _LabouchereHomePageState extends State<LabouchereHomePage> {
       }
       _history
           .add("Sequence: ${_sequence.join(', ')} \n Next Bet: $_currentBet");
+
+      _history.add("------------------------------");
     });
   }
 
@@ -119,8 +121,10 @@ class _LabouchereHomePageState extends State<LabouchereHomePage> {
       _totalWinnings = 0;
       _currentBet = 0;
       _initializeSequence();
+
       _history.add("System reset. New Target: $_targetAmount");
       _history.add("System reset. New Sequence: $_sequenceInput");
+      _history.add("----------------");
     });
   }
 
@@ -319,7 +323,7 @@ class _LabouchereHomePageState extends State<LabouchereHomePage> {
 
                 // History Log
                 SizedBox(
-                  height: 300,
+                  height: MediaQuery.of(context).size.height * 0.54,
                   child: Card(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),

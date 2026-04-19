@@ -37,7 +37,7 @@ class SelectionPageV2 extends StatelessWidget {
       ),
       _SelectionItem(
         label: "Random Name Generator",
-        fontSize: 28,
+        fontSize: 32,
         builder: (context) => const NameGeneratorHomePage(),
       ),
       _SelectionItem(
@@ -51,19 +51,29 @@ class SelectionPageV2 extends StatelessWidget {
         builder: (context) => const RouletteBoardPage(),
       ),
       _SelectionItem(
+        label: "Roulette Board V2",
+        fontSize: 32,
+        builder: (context) => const RouletteV2(),
+      ),
+      _SelectionItem(
         label: "Labouchere System",
         fontSize: 32,
         builder: (context) => const LabouchereHomePage(),
       ),
       _SelectionItem(
-        label: "Martingale System",
+        label: "Martingale Scroller",
         fontSize: 32,
-        builder: (context) => const MartingaleHomePage(),
+        builder: (context) => const MartingaleListPage(),
       ),
       _SelectionItem(
-        label: "Roulette Wheel",
+        label: "Baccarat",
         fontSize: 32,
-        builder: (context) => const RouletteWheel(),
+        builder: (context) => const BaccaratScreen(),
+      ),
+      _SelectionItem(
+        label: "Date Calculator Countdown",
+        fontSize: 32,
+        builder: (context) => const DateCalculatorScreen(),
       ),
     ];
 
@@ -109,30 +119,43 @@ class SelectionPageV2 extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 5,
             children: items.map((item) {
+              // Generate a random color from the primary swatches
               final Color randomColor = Colors
                   .primaries[(items.indexOf(item) + DateTime.now().second) %
                       Colors.primaries.length]
                   .shade900;
-              return ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: randomColor,
-                  foregroundColor:
-                      ThemeData.estimateBrightnessForColor(randomColor) ==
-                              Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: item.builder),
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate font size based on available width and text length
+                  double baseFontSize = item.fontSize;
+                  double maxWidth = constraints.maxWidth;
+                  double textLength = item.label.length.toDouble();
+                  // Adjust font size: longer text = smaller font
+                  double responsiveFontSize =
+                      (maxWidth / (textLength * 0.7)).clamp(16, baseFontSize);
+
+                  return ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: randomColor,
+                      foregroundColor:
+                          ThemeData.estimateBrightnessForColor(randomColor) ==
+                                  Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: item.builder),
+                      );
+                    },
+                    child: Text(
+                      item.label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: responsiveFontSize),
+                    ),
                   );
                 },
-                child: Text(
-                  item.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: item.fontSize),
-                ),
               );
             }).toList(),
           ),
@@ -145,6 +168,8 @@ class SelectionPageV2 extends StatelessWidget {
 class _SelectionItem {
   final String label;
   final double fontSize;
+
+  /// The builder function to create the widget for this selection item.
   final WidgetBuilder builder;
 
   _SelectionItem({

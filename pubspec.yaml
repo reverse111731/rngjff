@@ -3,10 +3,10 @@ description: "RNG just for fun"
 publish_to: 'none' 
 
 
-version: 5.2.0+11
+version: 5.5.0+16
 
 environment:
-  sdk: '>=3.6.0 <4.0.0'
+  sdk: '>=3.5.4 <4.0.0'
 
 dependencies:
   flutter:
