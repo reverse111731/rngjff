@@ -110,6 +110,7 @@ enum BetChoice { player, banker, tie }
 class _BaccaratScreenState extends State<BaccaratScreen>
     with SingleTickerProviderStateMixin {
   final Shoe _shoe = Shoe();
+  int _startingBalance = 1000;
 
   // Chips
   int _balance = 1000;
@@ -125,11 +126,121 @@ class _BaccaratScreenState extends State<BaccaratScreen>
   bool _roundInProgress = false;
 
   // Chip denominations
-  static const List<int> _chipValues = [10, 25, 50, 100];
+  static const List<int> _chipValues = [10, 25, 50, 100, 500, 1000];
 
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showStartingCapitalModal();
+    });
+  }
+
+  Future<void> _showStartingCapitalModal() async {
+    final controller = TextEditingController();
+    final presets = <int>[500, 1000, 2000, 5000, 10000, 20000];
+
+    int selectedPreset = _startingBalance;
+    String? customError;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return PopScope(
+              canPop: false,
+              child: AlertDialog(
+                title: const Text('Select Starting Capital'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: presets.map((amount) {
+                        return ChoiceChip(
+                          label: Text('$amount'),
+                          selected: selectedPreset == amount,
+                          onSelected: (_) {
+                            setDialogState(() {
+                              selectedPreset = amount;
+                              controller.clear();
+                              customError = null;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Custom amount',
+                        errorText: customError,
+                        border: const OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        if (value.trim().isNotEmpty) {
+                          setDialogState(() {
+                            selectedPreset = -1;
+                            customError = null;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      final customText = controller.text.trim();
+                      int selectedAmount;
+
+                      if (customText.isNotEmpty) {
+                        final parsed = int.tryParse(customText);
+                        if (parsed == null || parsed <= 0) {
+                          setDialogState(() {
+                            customError = 'Please enter a valid amount';
+                          });
+                          return;
+                        }
+                        selectedAmount = parsed;
+                      } else {
+                        selectedAmount = selectedPreset;
+                      }
+
+                      setState(() {
+                        _startingBalance = selectedAmount;
+                        _balance = selectedAmount;
+                        _currentBet = 0;
+                        _betChoice = null;
+                        _playerHand = [];
+                        _bankerHand = [];
+                        _resultMessage = null;
+                        _roundInProgress = false;
+                      });
+
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: const Text('Start Game'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   int _handTotal(List<PlayingCard> hand) {
     int sum = 0;
@@ -227,7 +338,7 @@ class _BaccaratScreenState extends State<BaccaratScreen>
 
     setState(() {
       _balance += payout;
-      _resultMessage = '$winner  (Player $pt — Banker $bt)';
+      _resultMessage = '$winner \n (Player $pt — Banker $bt)';
       _roundInProgress = false;
     });
   }
@@ -239,6 +350,18 @@ class _BaccaratScreenState extends State<BaccaratScreen>
       _currentBet = 0;
       _betChoice = null;
       _resultMessage = null;
+    });
+  }
+
+  void _resetGame() {
+    setState(() {
+      _balance = _startingBalance;
+      _playerHand = [];
+      _bankerHand = [];
+      _currentBet = 0;
+      _betChoice = null;
+      _resultMessage = null;
+      _roundInProgress = false;
     });
   }
 
@@ -260,6 +383,15 @@ class _BaccaratScreenState extends State<BaccaratScreen>
     });
   }
 
+  void _allIn() {
+    if (_roundInProgress) return;
+    if (_balance <= 0) return;
+    setState(() {
+      _currentBet += _balance;
+      _balance = 0;
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------------------
@@ -275,30 +407,39 @@ class _BaccaratScreenState extends State<BaccaratScreen>
         ),
         backgroundColor: const Color(0xFF0A4F1C),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          TextButton.icon(
+            onPressed: _roundInProgress ? null : _resetGame,
+            icon: const Icon(Icons.restart_alt, color: Colors.white),
+            label: const Text(
+              'Reset',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.all(16),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Column(
                   children: [
                     _buildBalanceBar(),
-                    const SizedBox(height: 16),
                     _buildHandSection('Banker', _bankerHand),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     _buildHandSection('Player', _playerHand),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     if (_resultMessage != null) _buildResultBanner(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     _buildBetChoiceRow(),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 24),
                     _buildChipRow(),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 36),
                     _buildActionButtons(),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -311,27 +452,27 @@ class _BaccaratScreenState extends State<BaccaratScreen>
 
   Widget _buildBalanceBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.black54,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Balance: \$$_balance',
+            'Balance: $_balance',
             style: const TextStyle(
               color: Colors.amberAccent,
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
-            'Bet: \$$_currentBet',
+            'Bet: $_currentBet',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -348,7 +489,7 @@ class _BaccaratScreenState extends State<BaccaratScreen>
           '$label  ($total)',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -356,14 +497,10 @@ class _BaccaratScreenState extends State<BaccaratScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: hand.isEmpty
-              ? [
-                  _buildEmptySlot(),
-                  const SizedBox(width: 10),
-                  _buildEmptySlot()
-                ]
+              ? [_buildEmptySlot(), const SizedBox(width: 8), _buildEmptySlot()]
               : hand
                   .map((c) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: _buildCard(c),
                       ))
                   .toList(),
@@ -374,8 +511,8 @@ class _BaccaratScreenState extends State<BaccaratScreen>
 
   Widget _buildCard(PlayingCard card) {
     return Container(
-      width: 70,
-      height: 100,
+      width: 72,
+      height: 104,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -389,14 +526,14 @@ class _BaccaratScreenState extends State<BaccaratScreen>
           Text(
             card.rankLabel,
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: card.suitColor,
             ),
           ),
           Text(
             card.suitSymbol,
-            style: TextStyle(fontSize: 22, color: card.suitColor),
+            style: TextStyle(fontSize: 24, color: card.suitColor),
           ),
         ],
       ),
@@ -405,8 +542,8 @@ class _BaccaratScreenState extends State<BaccaratScreen>
 
   Widget _buildEmptySlot() {
     return Container(
-      width: 70,
-      height: 100,
+      width: 72,
+      height: 104,
       decoration: BoxDecoration(
         color: Colors.white12,
         borderRadius: BorderRadius.circular(8),
@@ -418,17 +555,17 @@ class _BaccaratScreenState extends State<BaccaratScreen>
   Widget _buildResultBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         color: Colors.black87,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         _resultMessage!,
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Colors.amberAccent,
-          fontSize: 20,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -438,9 +575,15 @@ class _BaccaratScreenState extends State<BaccaratScreen>
   Widget _buildBetChoiceRow() {
     if (_roundInProgress || _playerHand.isNotEmpty) return const SizedBox();
 
+    const orderedChoices = [
+      BetChoice.player,
+      BetChoice.tie,
+      BetChoice.banker,
+    ];
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: BetChoice.values.map((choice) {
+      children: orderedChoices.map((choice) {
         final label = choice == BetChoice.player
             ? 'PLAYER'
             : (choice == BetChoice.banker ? 'BANKER' : 'TIE');
@@ -448,10 +591,10 @@ class _BaccaratScreenState extends State<BaccaratScreen>
         return GestureDetector(
           onTap: () => setState(() => _betChoice = choice),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
               color: isSelected ? Colors.amberAccent : Colors.white12,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isSelected ? Colors.amber : Colors.white38,
                 width: 2,
@@ -474,41 +617,59 @@ class _BaccaratScreenState extends State<BaccaratScreen>
   Widget _buildChipRow() {
     if (_roundInProgress || _playerHand.isNotEmpty) return const SizedBox();
 
-    return Wrap(
-      spacing: 10,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
-      children: _chipValues.map((val) {
-        return GestureDetector(
-          onTap: () => _placeBet(val),
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: _chipGradient(val),
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: Colors.white, width: 3),
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black45, blurRadius: 4, offset: Offset(1, 2)),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              '\$$val',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
+    final topRowChips = _chipValues.where((v) => v <= 50).toList();
+    final bottomRowChips = _chipValues.where((v) => v >= 100).toList();
+
+    return Column(
+      children: [
+        Wrap(
+          spacing: 8,
+          alignment: WrapAlignment.center,
+          children: topRowChips.map(_buildChip).toList(),
+        ),
+        if (bottomRowChips.isNotEmpty) const SizedBox(height: 8),
+        if (bottomRowChips.isNotEmpty)
+          Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.center,
+            children: bottomRowChips.map(_buildChip).toList(),
           ),
-        );
-      }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildChip(int val) {
+    return GestureDetector(
+      onTap: () => _placeBet(val),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: _chipGradient(val),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: Colors.white, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 4,
+              offset: Offset(1, 2),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '$val',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
     );
   }
 
@@ -522,6 +683,10 @@ class _BaccaratScreenState extends State<BaccaratScreen>
         return [Colors.red.shade700, Colors.red.shade400];
       case 100:
         return [Colors.purple.shade700, Colors.purple.shade400];
+      case 500:
+        return [Colors.orange.shade700, Colors.orange.shade400];
+      case 1000:
+        return [Colors.teal.shade700, Colors.teal.shade400];
       default:
         return [Colors.grey.shade700, Colors.grey.shade400];
     }
@@ -532,13 +697,13 @@ class _BaccaratScreenState extends State<BaccaratScreen>
       return ElevatedButton.icon(
         onPressed: _newRound,
         icon: const Icon(Icons.refresh),
-        label: const Text('New Round', style: TextStyle(fontSize: 18)),
+        label: const Text('New Round', style: TextStyle(fontSize: 16)),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.amberAccent,
           foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       );
     }
@@ -551,11 +716,23 @@ class _BaccaratScreenState extends State<BaccaratScreen>
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red.shade800,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: const Text('Clear', style: TextStyle(fontSize: 16)),
+        ),
+        const SizedBox(width: 16),
+        ElevatedButton(
+          onPressed: _balance > 0 ? _allIn : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey.shade700,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          child: const Text('All In', style: TextStyle(fontSize: 16)),
         ),
         const SizedBox(width: 16),
         ElevatedButton(
@@ -563,12 +740,12 @@ class _BaccaratScreenState extends State<BaccaratScreen>
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.amberAccent,
             foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: const Text('Deal',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ),
       ],
     );

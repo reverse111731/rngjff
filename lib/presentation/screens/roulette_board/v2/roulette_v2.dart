@@ -88,6 +88,14 @@ class _RouletteBoardState extends State<RouletteBoard> {
   double _cellWidth(double gridWidth) =>
       (gridWidth - kGap * (kColCount - 1)) / kColCount;
 
+  void _handleBack() {
+    // Use root navigator to ensure we pop the entire screen, even if there are nested navigators
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    if (rootNavigator.canPop()) {
+      rootNavigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
@@ -96,6 +104,11 @@ class _RouletteBoardState extends State<RouletteBoard> {
           children: [
             Scaffold(
               appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  color: Colors.grey.shade300,
+                  onPressed: _handleBack,
+                ),
                 title: Text(
                   'Roulette Board Analyzer',
                   style: TextStyle(
@@ -114,14 +127,14 @@ class _RouletteBoardState extends State<RouletteBoard> {
                     children: [
                       // Statistics Panel
                       _buildStatisticsPanel(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Roulette Board
                       _buildRouletteBoard(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       _clearButton(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Win/Loss Section
                       _buildWinLossSection(),
@@ -153,7 +166,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 16),
                       Text(
                         'This screen is best viewed in landscape mode',
                         style: TextStyle(
@@ -225,7 +238,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );
@@ -244,15 +257,22 @@ class _RouletteBoardState extends State<RouletteBoard> {
               children: [
                 // Zero on the left side
                 SizedBox(
-                  width: 60,
+                  width: 64,
                   child: SizedBox(
                     height: kGridHeight,
                     child: _buildNumberButton(0),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 // Main number grid with betting spots
                 Expanded(child: _buildMainNumberGrid()),
+                const SizedBox(width: 8),
+                // Column bets on the right side (3 to 36, 2 to 35, 1 to 34)
+                SizedBox(
+                  width: 80,
+                  height: kGridHeight,
+                  child: _buildColumnBets(),
+                ),
               ],
             ),
 
@@ -310,10 +330,58 @@ class _RouletteBoardState extends State<RouletteBoard> {
             },
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         // Street and double street bets below the grid
         _buildStreetBetsRow(),
       ],
+    );
+  }
+
+  Widget _buildColumnBets() {
+    return Column(
+      children: List.generate(kRowCount, (rowIndex) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: rowIndex < kRowCount - 1 ? kGap : 0,
+          ),
+          child: _buildColumnBet(rowIndex),
+        );
+      }),
+    );
+  }
+
+  Widget _buildColumnBet(int rowIndex) {
+    final columnNumbers = List<int>.from(boardLayout[rowIndex]);
+    final labels = ['3rd', '2nd', '1st'];
+
+    final isSelected = columnNumbers.every((n) => currentBet.contains(n));
+    final hasAny = columnNumbers.any((n) => currentBet.contains(n));
+
+    return GestureDetector(
+      onTap: () => _toggleBetGroup(columnNumbers),
+      child: Container(
+        height: kCellHeight,
+        decoration: BoxDecoration(
+          color: kBetGreen,
+          border: Border.all(
+            color: isSelected
+                ? Colors.yellow
+                : (hasAny ? Colors.orange : Colors.grey),
+            width: isSelected ? 3 : (hasAny ? 2 : 1),
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Center(
+          child: Text(
+            labels[rowIndex],
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -328,7 +396,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
                 // Double street bet (between columns)
                 if (colIndex > 0)
                   Flexible(flex: 0, child: _buildDoubleStreetBet(colIndex - 1)),
-                if (colIndex > 0) const SizedBox(width: 2),
+                if (colIndex > 0) const SizedBox(width: 8),
                 // Street bet (below column)
                 Expanded(child: _buildStreetBet(colIndex)),
               ],
@@ -394,7 +462,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
     return GestureDetector(
       onTap: () => _toggleBetGroup(splitNumbers),
       child: Container(
-        width: 12,
+        width: 16,
         height: 16,
         decoration: BoxDecoration(
           color: isSelected
@@ -412,7 +480,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
         ),
         child: Center(
           child: Container(
-            width: 2,
+            width: 8,
             height: 8,
             color: isSelected ? Colors.yellow : Colors.grey,
           ),
@@ -435,7 +503,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
       onTap: () => _toggleBetGroup(splitNumbers),
       child: Container(
         width: 16,
-        height: 12,
+        height: 16,
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.yellow.withOpacity(0.5)
@@ -453,7 +521,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
         child: Center(
           child: Container(
             width: 8,
-            height: 2,
+            height: 8,
             color: isSelected ? Colors.yellow : Colors.grey,
           ),
         ),
@@ -475,7 +543,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
     return GestureDetector(
       onTap: () => _toggleBetGroup(streetNumbers),
       child: Container(
-        height: 30,
+        height: 32,
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.yellow.withOpacity(0.3)
@@ -559,7 +627,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
       onTap: () => _toggleBetGroup(doubleStreetNumbers),
       child: Container(
         width: 16,
-        height: 30,
+        height: 32,
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.yellow.withOpacity(0.4)
@@ -590,7 +658,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
     return InkWell(
       onTap: () => _toggleNumber(number),
       child: Container(
-        height: 50,
+        height: 48,
         decoration: BoxDecoration(
           color: _numberColor(number),
           border: Border.all(
@@ -616,8 +684,8 @@ class _RouletteBoardState extends State<RouletteBoard> {
                 top: 2,
                 right: 2,
                 child: Container(
-                  width: 12,
-                  height: 12,
+                  width: 16,
+                  height: 16,
                   decoration: BoxDecoration(
                     color: Colors.yellow,
                     shape: BoxShape.circle,
@@ -643,7 +711,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
         Row(
           children: [
             for (int i = 0; i < 3; i++) ...[
-              if (i > 0) const SizedBox(width: 4),
+              if (i > 0) const SizedBox(width: 8),
               Expanded(
                 child: _buildOutsideBet(
                   ['1st 12', '2nd 12', '3rd 12'][i],
@@ -653,27 +721,27 @@ class _RouletteBoardState extends State<RouletteBoard> {
             ],
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
               child: _buildOutsideBet('1-18', List.generate(18, (i) => i + 1)),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildOutsideBet(
                 'EVEN',
                 List.generate(18, (i) => (i + 1) * 2),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildOutsideBet(
                 'ODD',
                 List.generate(18, (i) => i * 2 + 1),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildOutsideBet(
                 '19-36',
@@ -810,7 +878,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           const Text(
                             'Payout Ratio',
                             style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -819,7 +887,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   const Divider(color: Colors.grey),
                   const SizedBox(height: 16),
                   // Win/Loss breakdown
@@ -836,12 +904,12 @@ class _RouletteBoardState extends State<RouletteBoard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           const Text(
                             'Win',
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
                             '(Per \$1 bet)',
                             style: TextStyle(
@@ -852,8 +920,8 @@ class _RouletteBoardState extends State<RouletteBoard> {
                         ],
                       ),
                       Container(
-                        width: 1,
-                        height: 50,
+                        width: 8,
+                        height: 48,
                         color: Colors.grey.shade700,
                       ),
                       Column(
@@ -866,12 +934,12 @@ class _RouletteBoardState extends State<RouletteBoard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           const Text(
                             'Loss',
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
                             '(Per \$1 bet)',
                             style: TextStyle(

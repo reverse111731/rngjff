@@ -20,8 +20,8 @@ const kPayoutData = <int, (int, String)>{
 // --- Grid layout constants ---
 const kRowCount = 3;
 const kColCount = 12;
-const kCellHeight = 50.0;
-const kGap = 4.0;
+const kCellHeight = 48.0;
+const kGap = 8.0;
 const kGridHeight = kCellHeight * kRowCount + kGap * (kRowCount - 1);
 
 // Roulette numbers with their colors

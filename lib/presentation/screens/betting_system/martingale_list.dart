@@ -8,95 +8,95 @@ class MartingaleListPage extends StatefulWidget {
 }
 
 class _MartingaleListPageState extends State<MartingaleListPage> {
-  int _baseBet = 10;
-  int _currentBet = 10;
-  int _balance = 1000;
-  int _totalWinnings = 0;
-  int _doubledAmount = 0;
-  String _lastResult = '';
-  final TextEditingController _baseBetController = TextEditingController();
-  final TextEditingController _balanceController = TextEditingController();
-  final List<String> _history = [];
+  final List<int> _martingaleSequence = [];
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
+  final TextEditingController baseBetController = TextEditingController();
+  int baseBet = 10;
 
   @override
   void initState() {
     super.initState();
-    _baseBetController.text = _baseBet.toString();
-    _balanceController.text = _balance.toString();
-    _updateState();
+    _scrollController.addListener(_onScroll);
+    baseBetController.text = baseBet.toString();
+    _generateMoreMartingale();
   }
 
-  void _updateState() {
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void compute() {
+    if (baseBetController.text.isNotEmpty) {
+      final String inputBet = baseBetController.text.trim();
+      final int parsedBet = int.tryParse(inputBet)!;
+
+      setState(() {
+        baseBet = parsedBet;
+        _martingaleSequence.clear();
+        _generateMoreMartingale();
+        FocusScope.of(context).unfocus();
+        baseBetController.clear();
+      });
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Enter a number'),
+          content: const Text('You have not entered a base bet to compute Martingale.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !_isLoadingMore &&
+        _martingaleSequence.length < 10) {
+      _generateMoreMartingale();
+    }
+  }
+
+  void _generateMoreMartingale() {
+    if (_martingaleSequence.length >= 10) return;
+
     setState(() {
-      _currentBet = _baseBet;
-      _totalWinnings =
-          _balance - (int.tryParse(_balanceController.text) ?? 1000);
-      _lastResult = '';
-      _history.clear();
+      _isLoadingMore = true;
     });
-  }
 
-  void _handleWin() {
-    setState(() {
-      _balance += _currentBet;
-      _totalWinnings += _currentBet;
-      _lastResult = 'Win! Bet: \$$_currentBet';
-      _history.add('$_lastResult, Balance: \$$_balance');
-      _currentBet = _baseBet;
-      if (_currentBet > _balance) {
-        _currentBet = _balance;
+    Future.delayed(const Duration(milliseconds: 500), () {
+      int countToAdd = 10;
+      for (int i = 0; i < countToAdd; i++) {
+        if (_martingaleSequence.length >= 10) break;
+        if (_martingaleSequence.isEmpty) {
+          _martingaleSequence.add(baseBet);
+        } else {
+          _martingaleSequence.add(_martingaleSequence.last * 2);
+        }
       }
+      setState(() {
+        _isLoadingMore = false;
+      });
     });
   }
 
-  void _handleLoss() {
-    setState(() {
-      _doubledAmount = _currentBet * 2;
-      _balance -= _currentBet;
-      _totalWinnings -= _currentBet;
-      _lastResult = 'Lose! Bet: \$$_currentBet';
-      _history.add('$_lastResult, Balance: \$$_balance');
-      if (_balance > _doubledAmount) {
-        _currentBet = _doubledAmount;
-      }
-      //!
-      else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('STOP!!!'),
-            content: Text(
-                'Balance is too low to you need $_doubledAmount to bet, you only have $_balance left so STOP betting!'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    });
-  }
-
-  void _resetSystem() {
-    setState(() {
-      _baseBet = int.tryParse(_baseBetController.text) ?? 10;
-      _balance = int.tryParse(_balanceController.text) ?? 1000;
-      _currentBet = _baseBet;
-      _totalWinnings = 0;
-      _lastResult = '';
-      _history.clear();
-    });
-  }
 
   void _showInfoDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Martingale System Info'),
           content: const SingleChildScrollView(
             child: ListBody(
@@ -106,14 +106,13 @@ class _MartingaleListPageState extends State<MartingaleListPage> {
                 ),
                 SizedBox(height: 10),
                 Text('How it works:'),
-                Text('- Set a base bet and starting balance.'),
-                Text('- If you WIN, reset your bet to the base bet.'),
-                Text('- If you LOSE, double your bet for the next round.'),
-                Text(
-                    '- Repeat until you run out of balance or choose to stop.'),
+                Text('- Set a base bet amount.'),
+                Text('- Each step doubles the previous bet amount.'),
+                Text('- Scroll to see the full progression sequence.'),
                 SizedBox(height: 10),
-                Text(
-                    'Disclaimer: Betting systems do not guarantee profits and involve risk.'),
+                Text('Example: Base \$10 → \$10, \$20, \$40, \$80, \$160...'),
+                SizedBox(height: 10),
+                Text('Disclaimer: Betting systems do not guarantee profits and involve risk.'),
               ],
             ),
           ),
@@ -130,54 +129,11 @@ class _MartingaleListPageState extends State<MartingaleListPage> {
     );
   }
 
-  Widget inputCardSection(
-    BuildContext context,
-    String textTitle,
-    TextEditingController controller,
-    String label,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              textTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: label,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-              onChanged: (value) {
-                // No-op, handled on reset
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Martingale System Simulator'),
+        title: const Text('Martingale Scroller'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -186,184 +142,100 @@ class _MartingaleListPageState extends State<MartingaleListPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Row(
-                  children: [
-                    Expanded(
-                      child: inputCardSection(
-                        context,
-                        'Base Bet',
-                        _baseBetController,
-                        'Enter Base Bet',
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: baseBetController,
+                    decoration: InputDecoration(
+                      labelText: 'Enter base bet amount',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      filled: true,
+                      fillColor: Colors.deepPurple.shade50,
                     ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: inputCardSection(
-                        context,
-                        'Starting Balance',
-                        _balanceController,
-                        'Enter Starting Balance',
-                      ),
-                    ),
-                  ],
+                    onSubmitted: (_) => compute(),
+                  ),
                 ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: compute,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('compute'),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: _martingaleSequence.length +
+                  (_isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == _martingaleSequence.length) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                
+                final betAmount = _martingaleSequence[index];
+                final cumulativeCapital = _martingaleSequence
+                    .sublist(0, index + 1)
+                    .fold<int>(0, (prev, e) => prev + e);
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  elevation: 4.0,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 4,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current State:',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          'M(${index + 1}): ${betAmount.toString()}',
+                          style: const TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Balance: \$$_balance',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Current Bet: \$$_currentBet',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Total Winnings/Losses: $_totalWinnings',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: _totalWinnings >= 0
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _lastResult,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          'Total capital needed: \$$cumulativeCapital',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed:
-                            _balance > 0 && _currentBet > 0 ? _handleWin : null,
-                        icon: const Icon(Icons.check),
-                        label: const Text('WIN'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          elevation: 3,
-                          backgroundColor: Colors.lightGreen,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _resetSystem,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reset'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          elevation: 3,
-                          backgroundColor: Colors.green.shade700,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _balance > 0 && _currentBet > 0
-                            ? _handleLoss
-                            : null,
-                        icon: const Icon(Icons.close),
-                        label: const Text('LOSE'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          elevation: 3,
-                          backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 300,
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'History Log:',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const Divider(),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: _history.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Text(
-                                      _history[_history.length - 1 - index]),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
-        ),
+        ],
       ),
     );
   }

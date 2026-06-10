@@ -50,11 +50,11 @@ class SelectionPageV2 extends StatelessWidget {
         fontSize: 32,
         builder: (context) => const RouletteBoardPage(),
       ),
-      _SelectionItem(
-        label: "Roulette Board V2",
-        fontSize: 32,
-        builder: (context) => const RouletteV2(),
-      ),
+      // _SelectionItem(
+      //   label: "Roulette Board V2",
+      //   fontSize: 32,
+      //   builder: (context) => const RouletteV2(),
+      // ),
       _SelectionItem(
         label: "Labouchere System",
         fontSize: 32,
@@ -111,7 +111,7 @@ class SelectionPageV2 extends StatelessWidget {
         ),
         backgroundColor: Colors.grey.shade200,
         body: Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(8.0),
           child: GridView.count(
             crossAxisCount:
                 kIsWeb ? 2 : (Platform.isAndroid || Platform.isIOS ? 1 : 2),
