@@ -7,7 +7,6 @@ import '../index.dart';
 
 class WheelOfNamesScreen extends StatefulWidget {
   const WheelOfNamesScreen({super.key});
-  //   final Random random = Random();
 
   @override
   State<WheelOfNamesScreen> createState() => _WheelOfNamesScreenState();
@@ -88,7 +87,6 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
         targetSpinIndex = null; // Clear the target index
       });
 
-      // showMessage('🎉 $selectedName was selected and removed! 🎉');
       showComingSoonModal(context, selectedName);
     }
   }
@@ -301,23 +299,18 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Row(
-                              // <-- Changed to Row
-                              mainAxisAlignment: MainAxisAlignment
-                                  .spaceBetween, // <-- Aligns text and button
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                  // <-- Ensures text takes available space
                                   child: Text(
                                     names[index],
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
                                 IconButton(
-                                  // <-- Added IconButton
                                   icon: const Icon(Icons.delete,
                                       color: Colors.redAccent),
-                                  onPressed: () => removeName(
-                                      index), // Call the new remove function
+                                  onPressed: () => removeName(index),
                                 ),
                               ],
                             ),

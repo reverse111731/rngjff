@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'baccarat_rules.dart';
 
 /// A simple Baccarat game with Player, Banker, and Tie betting.
 /// Follows standard 8-deck baccarat third-card rules.
@@ -408,14 +409,16 @@ class _BaccaratScreenState extends State<BaccaratScreen>
         backgroundColor: const Color(0xFF0A4F1C),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          TextButton.icon(
-            onPressed: _roundInProgress ? null : _resetGame,
-            icon: const Icon(Icons.restart_alt, color: Colors.white),
-            label: const Text(
-              'Reset',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-            ),
+          IconButton(
+            tooltip: 'Rules',
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const BaccaratRulesScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
