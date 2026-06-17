@@ -6,31 +6,33 @@ class BaccaratRulesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Baccarat Rules'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _RuleSectionTitle(title: 'Player Third-Card Rule'),
-                const _SimpleRuleTable(columnLabel: 'Player Total'),
-                const SizedBox(height: 24),
-                _RuleSectionTitle(title: 'Banker Rule (when Player stands)'),
-                const _SimpleRuleTable(columnLabel: 'Banker Total'),
-                const SizedBox(height: 24),
-                _RuleSectionTitle(
-                  title: 'Banker Rule (when Player draws a third card)',
-                ),
-                const _ComplexBankerTable(),
-                const SizedBox(height: 24),
-                const _NotesSection(),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Baccarat Rules'),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _RuleSectionTitle(title: 'Player Third-Card Rule'),
+                  const _SimpleRuleTable(columnLabel: 'Player Total'),
+                  const SizedBox(height: 24),
+                  _RuleSectionTitle(title: 'Banker Rule (when Player stands)'),
+                  const _SimpleRuleTable(columnLabel: 'Banker Total'),
+                  const SizedBox(height: 24),
+                  _RuleSectionTitle(
+                    title: 'Banker Rule (when Player draws a third card)',
+                  ),
+                  const _ComplexBankerTable(),
+                  const SizedBox(height: 24),
+                  const _NotesSection(),
+                ],
+              ),
             ),
           ),
         ),

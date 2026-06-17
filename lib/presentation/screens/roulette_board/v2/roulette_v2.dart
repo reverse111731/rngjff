@@ -102,7 +102,8 @@ class _RouletteBoardState extends State<RouletteBoard> {
       builder: (context, orientation) {
         return Stack(
           children: [
-            Scaffold(
+            SafeArea(
+              child: Scaffold(
               appBar: AppBar(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -141,6 +142,7 @@ class _RouletteBoardState extends State<RouletteBoard> {
                     ],
                   ),
                 ),
+              ),
               ),
             ),
 

@@ -176,155 +176,50 @@ class _LabouchereHomePageState extends State<LabouchereHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Labouchere System Simulator'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showInfoDialog,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // Added SingleChildScrollView here
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // Target Amount Input
-                Row(
-                  children: [
-                    Expanded(
-                      child: inputCardSection(
-                        context,
-                        'Target Amount',
-                        _targetController,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Labouchere System Simulator'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: _showInfoDialog,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            // Added SingleChildScrollView here
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  // Target Amount Input
+                  Row(
+                    children: [
+                      Expanded(
+                        child: inputCardSection(
+                          context,
+                          'Target Amount',
+                          _targetController,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: inputCardSection(
-                        context,
-                        'Number of Sequence',
-                        _sequenceController,
-                      ),
-                    )
-                  ],
-                ),
-
-                // Current State Display
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Current State:',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: inputCardSection(
+                          context,
+                          'Number of Sequence',
+                          _sequenceController,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Sequence: ${_sequence.isEmpty ? 'Empty' : _sequence.join(', ')}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Next Bet: $_currentBet',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Total Winnings/Losses: $_totalWinnings',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: _totalWinnings >= 0
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
-                    ),
+                      )
+                    ],
                   ),
-                ),
-
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _handleWin,
-                        icon: const Icon(Icons.check),
-                        label: const Text('WIN'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          elevation: 3,
-                          backgroundColor: Colors.lightGreen,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _resetSystem,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reset'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          elevation: 3,
-                          backgroundColor: Colors.green.shade700,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _handleLoss,
-                        icon: const Icon(Icons.close),
-                        label: const Text('LOSE'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          elevation: 3,
-                          backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // History Log
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.54,
-                  child: Card(
+      
+                  // Current State Display
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 4,
@@ -334,32 +229,139 @@ class _LabouchereHomePageState extends State<LabouchereHomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'History Log:',
+                            'Current State:',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          const Divider(),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: _history.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Text(
-                                      _history[_history.length - 1 - index]),
-                                );
-                              },
-                            ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Sequence: ${_sequence.isEmpty ? 'Empty' : _sequence.join(', ')}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Next Bet: $_currentBet',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Total Winnings/Losses: $_totalWinnings',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: _totalWinnings >= 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
+      
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _handleWin,
+                          icon: const Icon(Icons.check),
+                          label: const Text('WIN'),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 15),
+                            elevation: 3,
+                            backgroundColor: Colors.lightGreen,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _resetSystem,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Reset'),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            elevation: 3,
+                            backgroundColor: Colors.green.shade700,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _handleLoss,
+                          icon: const Icon(Icons.close),
+                          label: const Text('LOSE'),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 15),
+                            elevation: 3,
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+      
+                  // History Log
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.54,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'History Log:',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const Divider(),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: _history.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4.0),
+                                    child: Text(
+                                        _history[_history.length - 1 - index]),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

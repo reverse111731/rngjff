@@ -34,7 +34,8 @@ class _CoinFlipHomePageState extends State<CoinFlipHomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Coin Flip'),
         centerTitle: true,
@@ -109,6 +110,7 @@ class _CoinFlipHomePageState extends State<CoinFlipHomePage>
             ],
           ),
         ),
+      ),
       ),
     );
   }

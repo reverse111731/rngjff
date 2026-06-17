@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:rngjff/presentation/screens/dragon_tiger/dragon_tiger.dart';
 
 import 'index.dart';
 
@@ -17,6 +18,26 @@ class SelectionPageV2 extends StatelessWidget {
         fontSize: 32,
         builder: (context) => const WheelOfNamesScreen(),
       ),
+       _SelectionItem(
+        label: "Martingale Scroller",
+        fontSize: 32,
+        builder: (context) => const MartingaleListPage(),
+      ),
+      _SelectionItem(
+        label: "Baccarat",
+        fontSize: 32,
+        builder: (context) => const BaccaratScreen(),
+      ),
+      _SelectionItem(
+        label: "Dragon Tiger",
+        fontSize: 32,
+        builder: (context) => const DragonTigerScreen(),
+      ),
+      _SelectionItem(
+        label: "Date Calculator Countdown",
+        fontSize: 32,
+        builder: (context) => const DateCalculatorScreen(),
+      ),
       _SelectionItem(
         label: "Dice",
         fontSize: 32,
@@ -24,6 +45,11 @@ class SelectionPageV2 extends StatelessWidget {
           Colors.purple,
           Colors.deepPurple,
         ),
+      ),
+       _SelectionItem(
+        label: "Roulette Board Guide",
+        fontSize: 32,
+        builder: (context) => const RouletteBoardPage(),
       ),
       _SelectionItem(
         label: "Random Numbers",
@@ -45,30 +71,11 @@ class SelectionPageV2 extends StatelessWidget {
         fontSize: 32,
         builder: (context) => const FibonacciListPage(),
       ),
-      _SelectionItem(
-        label: "Roulette Board Guide",
-        fontSize: 32,
-        builder: (context) => const RouletteBoardPage(),
-      ),
+     
       _SelectionItem(
         label: "Labouchere System",
         fontSize: 32,
         builder: (context) => const LabouchereHomePage(),
-      ),
-      _SelectionItem(
-        label: "Martingale Scroller",
-        fontSize: 32,
-        builder: (context) => const MartingaleListPage(),
-      ),
-      _SelectionItem(
-        label: "Baccarat",
-        fontSize: 32,
-        builder: (context) => const BaccaratScreen(),
-      ),
-      _SelectionItem(
-        label: "Date Calculator Countdown",
-        fontSize: 32,
-        builder: (context) => const DateCalculatorScreen(),
       ),
     ];
 

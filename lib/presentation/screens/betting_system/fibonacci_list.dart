@@ -105,7 +105,8 @@ class _FibonacciListPageState extends State<FibonacciListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: AppBar(
         title: Text('Fibonacci Scroller'),
         centerTitle: true,
@@ -196,6 +197,7 @@ class _FibonacciListPageState extends State<FibonacciListPage> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

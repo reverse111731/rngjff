@@ -131,111 +131,113 @@ class _MartingaleListPageState extends State<MartingaleListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Martingale Scroller'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showInfoDialog,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Martingale Scroller'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: _showInfoDialog,
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      controller: baseBetController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter base bet amount',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.deepPurple.shade50,
+                      ),
+                      onSubmitted: (_) => compute(),
+                    ),
+                  ),
+                ),
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: baseBetController,
-                    decoration: InputDecoration(
-                      labelText: 'Enter base bet amount',
-                      border: OutlineInputBorder(
+                  child: ElevatedButton(
+                    onPressed: compute,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      filled: true,
-                      fillColor: Colors.deepPurple.shade50,
                     ),
-                    onSubmitted: (_) => compute(),
+                    child: const Text('compute'),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: compute,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 15),
+              ],
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _martingaleSequence.length +
+                    (_isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _martingaleSequence.length) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  
+                  final betAmount = _martingaleSequence[index];
+                  final cumulativeCapital = _martingaleSequence
+                      .sublist(0, index + 1)
+                      .fold<int>(0, (prev, e) => prev + e);
+      
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    elevation: 4.0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
-                  ),
-                  child: const Text('compute'),
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _martingaleSequence.length +
-                  (_isLoadingMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == _martingaleSequence.length) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: CircularProgressIndicator(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'M(${index + 1}): ${betAmount.toString()}',
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Total capital needed: \$$cumulativeCapital',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
-                }
-                
-                final betAmount = _martingaleSequence[index];
-                final cumulativeCapital = _martingaleSequence
-                    .sublist(0, index + 1)
-                    .fold<int>(0, (prev, e) => prev + e);
-
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  elevation: 4.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'M(${index + 1}): ${betAmount.toString()}',
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Total capital needed: \$$cumulativeCapital',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

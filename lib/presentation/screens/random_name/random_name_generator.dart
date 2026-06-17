@@ -25,7 +25,8 @@ class _NameGeneratorHomePageState extends State<NameGeneratorHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Random Name Generator'),
         centerTitle: true,
@@ -70,6 +71,7 @@ class _NameGeneratorHomePageState extends State<NameGeneratorHomePage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

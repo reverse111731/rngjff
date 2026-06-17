@@ -111,215 +111,251 @@ class _WheelOfNamesScreenState extends State<WheelOfNamesScreen> {
     );
   }
 
+  // Compute WCAG contrast ratio between two colors.
+  double _contrastRatio(Color a, Color b) {
+    final double la = a.computeLuminance();
+    final double lb = b.computeLuminance();
+    final double l1 = max(la, lb);
+    final double l2 = min(la, lb);
+    return (l1 + 0.05) / (l2 + 0.05);
+  }
+
+  // Choose the more readable color (black or white) for given background.
+  Color _readableTextColor(Color background) {
+    final double whiteContrast = _contrastRatio(background, Colors.white);
+    final double blackContrast = _contrastRatio(background, Colors.black);
+    return (whiteContrast >= blackContrast) ? Colors.white : Colors.black;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Wheel of Names'),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Input field and Add button
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: nameInputController,
-                    decoration: InputDecoration(
-                      labelText: 'Enter a name',
-                      border: OutlineInputBorder(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Wheel of Names'),
+          centerTitle: true,
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Input field and Add button
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: nameInputController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter a name',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.blue.shade50,
+                      ),
+                      onSubmitted: (_) => addName(), // Add on pressing Enter
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: addName,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      filled: true,
-                      fillColor: Colors.blue.shade50,
                     ),
-                    onSubmitted: (_) => addName(), // Add on pressing Enter
+                    child: const Text('Add Name'),
+                  ),
+                ],
+              ),
+      
+              const SizedBox(height: 16),
+      
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: addName,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                onPressed: generateRandomName,
+                child: const Text("Generate Random Name"),
+              ),
+      
+              const SizedBox(height: 16),
+      
+              // Spin Button
+              ElevatedButton(
+                onPressed: (names.isEmpty || names.length == 1)
+                    ? null
+                    : spinWheel, // Disable if no names
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: (names.isEmpty || names.length == 1)
+                      ? Colors.grey
+                      : Colors.green,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text('Add Name'),
+                  elevation: 5,
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orangeAccent,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                child: Text(
+                  (names.isEmpty || names.length == 1)
+                      ? 'Add names to spin!'
+                      : 'Spin the Wheel!',
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
-              onPressed: generateRandomName,
-              child: const Text("Generate Random Name"),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Spin Button
-            ElevatedButton(
-              onPressed: (names.isEmpty || names.length == 1)
-                  ? null
-                  : spinWheel, // Disable if no names
-              style: ElevatedButton.styleFrom(
-                backgroundColor: (names.isEmpty || names.length == 1)
-                    ? Colors.grey
-                    : Colors.green,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 5,
-              ),
-              child: Text(
-                (names.isEmpty || names.length == 1)
-                    ? 'Add names to spin!'
-                    : 'Spin the Wheel!',
-                style: const TextStyle(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Wheel of Names
-            Expanded(
-              child: names.isEmpty || names.length == 1
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lightbulb_outline,
-                              size: 60, color: Colors.amber.shade700),
-                          const SizedBox(height: 8),
-                          Text(
-                            names.length == 1
-                                ? 'Add 1 more name to start the wheel!'
-                                : 'Add 2 names above to start the wheel!',
-                            style: TextStyle(
-                                fontSize: 18, color: Colors.grey.shade700),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    )
-                  : FortuneWheel(
-                      selected: selected.stream,
-                      animateFirst: false,
-                      // The list of FortuneItems, created dynamically from names
-                      items: [
-                        for (var name in names)
-                          FortuneItem(
+              const SizedBox(height: 16),
+              // Wheel of Names
+              Expanded(
+                child: names.isEmpty || names.length == 1
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lightbulb_outline,
+                                size: 60, color: Colors.amber.shade700),
+                            const SizedBox(height: 8),
+                            Text(
+                              names.length == 1
+                                  ? 'Add 1 more name to start the wheel!'
+                                  : 'Add 2 names above to start the wheel!',
+                              style: TextStyle(
+                                  fontSize: 18, color: Colors.grey.shade700),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : FortuneWheel(
+                        selected: selected.stream,
+                        animateFirst: false,
+                        // The list of FortuneItems, created dynamically from names
+                        items: names.map((name) {
+                          final Color sliceColor = Colors.primaries[
+                              random.nextInt(Colors.primaries.length)];
+                          final Color textColor = _readableTextColor(sliceColor);
+                          final double bestContrast = max(
+                            _contrastRatio(sliceColor, Colors.white),
+                            _contrastRatio(sliceColor, Colors.black),
+                          );
+      
+                          // Add subtle shadow when contrast is low to improve legibility
+                          final List<Shadow>? shadows =
+                              bestContrast < 4.5
+                                  ? [
+                                      const Shadow(
+                                          color: Colors.black26,
+                                          blurRadius: 2,
+                                          offset: Offset(0, 1)),
+                                    ]
+                                  : null;
+      
+                          return FortuneItem(
                             child: Center(
                               child: Text(
                                 name,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: textColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
+                                  shadows: shadows,
                                 ),
                               ),
                             ),
                             // Optional: Customize item styles
                             style: FortuneItemStyle(
-                              color: Colors.primaries[Random().nextInt(
-                                  Colors.primaries.length)], // Random color
+                              color: sliceColor,
                               borderColor: Colors.black,
                               borderWidth: 2,
                             ),
-                          ),
-                      ],
-                      onAnimationEnd: onSpinAnimationEnd,
-                      // Customize indicator (the pointer)
-                      indicators: const <FortuneIndicator>[
-                        FortuneIndicator(
-                          alignment:
-                              Alignment.topCenter, // Alignment of the indicator
-                          child: TriangleIndicator(
-                            color: Colors.redAccent, // Color of the indicator
-                            width: 25, // Width of the indicator
-                            height: 25, // Height of the indicator
-                          ),
-                        ),
-                      ],
-                      // Customize physics for a more natural feel
-                      physics: CircularPanPhysics(
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeOut,
-                      ),
-                      // Set total rotations for a good spin effect
-                      rotationCount: 8,
-                      // Set total duration for the animation
-                      duration: const Duration(seconds: 3),
-                    ),
-            ),
-            const SizedBox(height: 16),
-
-            // Display current names in the wheel
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Names on Wheel (${names.length}):',
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              flex: names.isEmpty ? 0 : 1,
-              child: names.isEmpty
-                  ? const SizedBox.shrink()
-                  : ListView.builder(
-                      itemCount: names.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 4, horizontal: 0),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    names[index],
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.redAccent),
-                                  onPressed: () => removeName(index),
-                                ),
-                              ],
+                          );
+                        }).toList(),
+                        onAnimationEnd: onSpinAnimationEnd,
+                        // Customize indicator (the pointer)
+                        indicators: const <FortuneIndicator>[
+                          FortuneIndicator(
+                            alignment:
+                                Alignment.topCenter, // Alignment of the indicator
+                            child: TriangleIndicator(
+                              color: Colors.redAccent, // Color of the indicator
+                              width: 25, // Width of the indicator
+                              height: 25, // Height of the indicator
                             ),
                           ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                        ],
+                        // Customize physics for a more natural feel
+                        physics: CircularPanPhysics(
+                          duration: const Duration(seconds: 1),
+                          curve: Curves.easeOut,
+                        ),
+                        // Set total rotations for a good spin effect
+                        rotationCount: 8,
+                        // Set total duration for the animation
+                        duration: const Duration(seconds: 3),
+                      ),
+              ),
+              const SizedBox(height: 16),
+      
+              // Display current names in the wheel
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Names on Wheel (${names.length}):',
+                  style:
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                flex: names.isEmpty ? 0 : 1,
+                child: names.isEmpty
+                    ? const SizedBox.shrink()
+                    : ListView.builder(
+                        itemCount: names.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 0),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      names[index],
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.redAccent),
+                                    onPressed: () => removeName(index),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

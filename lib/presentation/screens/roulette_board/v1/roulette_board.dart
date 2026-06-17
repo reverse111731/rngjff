@@ -170,154 +170,156 @@ class _RouletteBoardPageState extends State<RouletteBoardPage> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Roulette Board Guide',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Roulette Board Guide',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              )),
+          centerTitle: true,
+          backgroundColor: Colors.green.shade900,
+          actions: [
+            IconButton(
+              icon:
+                  Icon(showWheel ? Icons.grid_on : Icons.change_circle_outlined),
+              tooltip: showWheel ? 'Show Board' : 'Show Wheel',
+              onPressed: toggleShowWheel,
               color: Colors.white,
-            )),
-        centerTitle: true,
-        backgroundColor: Colors.green.shade900,
-        actions: [
-          IconButton(
-            icon:
-                Icon(showWheel ? Icons.grid_on : Icons.change_circle_outlined),
-            tooltip: showWheel ? 'Show Board' : 'Show Wheel',
-            onPressed: toggleShowWheel,
-            color: Colors.white,
-          ),
-        ],
-      ),
-      backgroundColor:
-          Colors.green.shade300, // Light green background for the app
-      body: showWheel
-          ? RouletteWheel()
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Enables horizontal scrolling
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                // This main Row holds all the vertical sections of the board
-                children: [
-                  // --- 0 section---
-                  Column(
-                    children: [
-                      if (doubleZeroEnabled) ...[
-                        _buildNumberCell('0', _getNumberColor(0),
-                            height: greenCellCombinedHeight / 2.1),
-                        _buildNumberCell('00', _getNumberColor(37),
-                            height: greenCellCombinedHeight / 2.1),
-                      ] else ...[
-                        _buildNumberCell('0', _getNumberColor(0),
-                            height: greenCellCombinedHeight),
-                      ]
-                    ],
-                  ),
-
-                  // --- Main 1-36 Numbers Grid (3 rows, 12 columns) and "2 to 1" cells ---
-                  Column(
-                    children: [
-                      // Top row of numbers
-                      Row(
-                        children: List.generate(
-                          12,
-                          (i) => _buildNumberCell(
-                              '${(3 * i) + 3}', _getNumberColor((3 * i) + 3),
-                              width: cellSize),
-                        ),
-                      ),
-
-                      // Middle row of numbers (2, 5, 8, ..., 35)
-                      Row(
-                        children: List.generate(
-                            12,
-                            (i) => _buildNumberCell(
-                                '${(3 * i) + 2}', _getNumberColor((3 * i) + 2),
-                                width: cellSize, height: cellSize)),
-                      ),
-                      // Bottom row of numbers
-                      Row(
-                        children: List.generate(
-                            12,
-                            (i) => _buildNumberCell(
-                                '${(3 * i) + 1}', _getNumberColor((3 * i) + 1),
-                                width: cellSize, height: cellSize)),
-                      ),
-
-                      //! Dozen bets
-                      Row(
-                        children: List.generate(
-                          3,
-                          (i) => _buildDozenBetCell(
-                            '${(i * 12) + 1} - ${(i + 1) * 12}',
-                            width: 250,
-                          ),
-                        ),
-                      ),
-
-                      //! Outside bets
-                      Row(
-                        children: [
-                          _buildOutsideBetCell('1-18', Colors.blueGrey.shade800,
-                              width: 120, height: cellSize),
-                          _buildOutsideBetCell('EVEN', Colors.blueGrey.shade800,
-                              width: 120, height: cellSize),
-                          _buildOutsideBetCell('RED', Colors.red,
-                              width: 120, height: cellSize),
-                          _buildOutsideBetCell('BLACK', Colors.black,
-                              width: 120, height: cellSize),
-                          _buildOutsideBetCell('ODD', Colors.blueGrey.shade800,
-                              width: 120, height: cellSize),
-                          _buildOutsideBetCell(
-                              '19-36', Colors.blueGrey.shade800,
-                              width: 120, height: cellSize),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // _buildToggleZero(),
-                          _buildRules(
-                              text: 'Straight Up 35:1',
-                              onTap: () => showDialogForStriaghtUp(context)),
-                          _buildRules(
-                              text: 'Split 17:1',
-                              onTap: () => showDialogForSplitBet(context)),
-                          _buildRules(
-                              text: 'Street 11:1',
-                              onTap: () => showDialogForStreetBet(context)),
-                          _buildRules(
-                              text: 'Corner 8:1',
-                              onTap: () => showDialogForCornerBet(context)),
-                          _buildRules(
-                              text: 'Double Street or Line 5:1',
-                              onTap: () => showDialogForLineBet(context)),
-                          _buildRules(
-                            text: 'Column & Dozen bets 2:1',
-                            onTap: () => showDialogForDozenColumnBet(context),
-                          ),
-                          _buildRules(
-                            text: 'Outside bets 1:1',
-                            onTap: () =>
-                                showDialogForOneToOneOutsideBet(context),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  // --- Column bets ---
-                  Column(
-                    children: [
-                      _buildTwoToOneCell(height: 60, width: 60),
-                      _buildTwoToOneCell(height: 60, width: 60),
-                      _buildTwoToOneCell(height: 60, width: 60),
-                    ],
-                  ),
-                ],
-              ),
             ),
+          ],
+        ),
+        backgroundColor:
+            Colors.green.shade300, // Light green background for the app
+        body: showWheel
+            ? RouletteWheel()
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Enables horizontal scrolling
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // This main Row holds all the vertical sections of the board
+                  children: [
+                    // --- 0 section---
+                    Column(
+                      children: [
+                        if (doubleZeroEnabled) ...[
+                          _buildNumberCell('0', _getNumberColor(0),
+                              height: greenCellCombinedHeight / 2.1),
+                          _buildNumberCell('00', _getNumberColor(37),
+                              height: greenCellCombinedHeight / 2.1),
+                        ] else ...[
+                          _buildNumberCell('0', _getNumberColor(0),
+                              height: greenCellCombinedHeight),
+                        ]
+                      ],
+                    ),
+      
+                    // --- Main 1-36 Numbers Grid (3 rows, 12 columns) and "2 to 1" cells ---
+                    Column(
+                      children: [
+                        // Top row of numbers
+                        Row(
+                          children: List.generate(
+                            12,
+                            (i) => _buildNumberCell(
+                                '${(3 * i) + 3}', _getNumberColor((3 * i) + 3),
+                                width: cellSize),
+                          ),
+                        ),
+      
+                        // Middle row of numbers (2, 5, 8, ..., 35)
+                        Row(
+                          children: List.generate(
+                              12,
+                              (i) => _buildNumberCell(
+                                  '${(3 * i) + 2}', _getNumberColor((3 * i) + 2),
+                                  width: cellSize, height: cellSize)),
+                        ),
+                        // Bottom row of numbers
+                        Row(
+                          children: List.generate(
+                              12,
+                              (i) => _buildNumberCell(
+                                  '${(3 * i) + 1}', _getNumberColor((3 * i) + 1),
+                                  width: cellSize, height: cellSize)),
+                        ),
+      
+                        //! Dozen bets
+                        Row(
+                          children: List.generate(
+                            3,
+                            (i) => _buildDozenBetCell(
+                              '${(i * 12) + 1} - ${(i + 1) * 12}',
+                              width: 250,
+                            ),
+                          ),
+                        ),
+      
+                        //! Outside bets
+                        Row(
+                          children: [
+                            _buildOutsideBetCell('1-18', Colors.blueGrey.shade800,
+                                width: 120, height: cellSize),
+                            _buildOutsideBetCell('EVEN', Colors.blueGrey.shade800,
+                                width: 120, height: cellSize),
+                            _buildOutsideBetCell('RED', Colors.red,
+                                width: 120, height: cellSize),
+                            _buildOutsideBetCell('BLACK', Colors.black,
+                                width: 120, height: cellSize),
+                            _buildOutsideBetCell('ODD', Colors.blueGrey.shade800,
+                                width: 120, height: cellSize),
+                            _buildOutsideBetCell(
+                                '19-36', Colors.blueGrey.shade800,
+                                width: 120, height: cellSize),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // _buildToggleZero(),
+                            _buildRules(
+                                text: 'Straight Up 35:1',
+                                onTap: () => showDialogForStriaghtUp(context)),
+                            _buildRules(
+                                text: 'Split 17:1',
+                                onTap: () => showDialogForSplitBet(context)),
+                            _buildRules(
+                                text: 'Street 11:1',
+                                onTap: () => showDialogForStreetBet(context)),
+                            _buildRules(
+                                text: 'Corner 8:1',
+                                onTap: () => showDialogForCornerBet(context)),
+                            _buildRules(
+                                text: 'Double Street or Line 5:1',
+                                onTap: () => showDialogForLineBet(context)),
+                            _buildRules(
+                              text: 'Column & Dozen bets 2:1',
+                              onTap: () => showDialogForDozenColumnBet(context),
+                            ),
+                            _buildRules(
+                              text: 'Outside bets 1:1',
+                              onTap: () =>
+                                  showDialogForOneToOneOutsideBet(context),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // --- Column bets ---
+                    Column(
+                      children: [
+                        _buildTwoToOneCell(height: 60, width: 60),
+                        _buildTwoToOneCell(height: 60, width: 60),
+                        _buildTwoToOneCell(height: 60, width: 60),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+      ),
     );
   }
 }

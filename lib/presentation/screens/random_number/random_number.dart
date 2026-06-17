@@ -19,7 +19,7 @@ class RandomNumberGeneratorState extends State<RandomNumberGenerator> {
     switch (_selectedDigits) {
       case 0:
         min = 0;
-        max = 9999;
+        max = 99999;
         break;
       case 1:
         min = 0;
@@ -58,7 +58,8 @@ class RandomNumberGeneratorState extends State<RandomNumberGenerator> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Random Number Generator'),
         centerTitle: true,
@@ -138,6 +139,7 @@ class RandomNumberGeneratorState extends State<RandomNumberGenerator> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

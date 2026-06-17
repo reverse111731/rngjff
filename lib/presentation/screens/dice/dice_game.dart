@@ -15,8 +15,9 @@ class GradientContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: startAlignment, // Start the gradient from top-left
@@ -29,6 +30,7 @@ class GradientContainer extends StatelessWidget {
         ),
         // Center the DiceRoller widget within the container
         child: const Center(child: DiceRoller()),
+        ),
       ),
     );
   }
