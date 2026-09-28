@@ -2,6 +2,7 @@
 export 'random_name/wheel_of_names.dart';
 export 'coin_flip/coin_flip.dart';
 export 'dice/dice_game.dart';
+export 'color_game/color_game.dart';
 export 'random_name/random_name_generator.dart';
 export 'random_number/random_number.dart';
 export 'betting_system/fibonacci_list.dart';

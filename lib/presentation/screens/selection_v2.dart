@@ -46,6 +46,11 @@ class SelectionPageV2 extends StatelessWidget {
           Colors.deepPurple,
         ),
       ),
+      _SelectionItem(
+        label: "Color Game",
+        fontSize: 32,
+        builder: (context) => const ColorGameScreen(),
+      ),
        _SelectionItem(
         label: "Roulette Board Guide",
         fontSize: 32,

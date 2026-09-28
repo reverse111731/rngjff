@@ -57,14 +57,11 @@ class _DiceRollerState extends State<DiceRoller> {
   // Function to roll all selected dice
   void _rollAllDice() {
     setState(() {
-      // Clear the current rolls and re-populate based on selected dice count
-      _currentDiceRolls.clear();
-      _totalDiceCount = 0;
-      for (int i = 0; i < _selectedDiceCount; i++) {
-        // Generate a random number between 1 and 6 for each die
-        _currentDiceRolls.add(randomizer.nextInt(6) + 1);
-        _totalDiceCount += _currentDiceRolls[i];
-      }
+      _currentDiceRolls = List.generate(
+        _selectedDiceCount,
+        (_) => randomizer.nextInt(6) + 1,
+      );
+      _totalDiceCount = _currentDiceRolls.fold(0, (sum, roll) => sum + roll);
     });
   }
 
@@ -76,80 +73,56 @@ class _DiceRollerState extends State<DiceRoller> {
       children: [
         // Display dice images based on _currentDiceRolls
 
-        // Radio button selector for number of dice
-        // Wrapped in Material widget to resolve the "Material ancestor" error
-        Material(
-          color: Colors
-              .transparent, // Make the material transparent to show the gradient
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Row(
-              children: [
-                // Radio button for 1 die
-                Flexible(
-                  child: RadioListTile<int>(
-                    title: const Text('1 Die',
-                        style: TextStyle(color: Colors.white)),
-                    value: 1,
-                    groupValue: _selectedDiceCount,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedDiceCount = value!;
-                        _totalDiceCount = _selectedDiceCount;
-                        _currentDiceRolls = [
-                          1
-                        ]; // Reset to 1 die when count changes
-                      });
-                    },
-                    activeColor:
-                        Colors.white, // Color of the selected radio button
-                    contentPadding: EdgeInsets.zero, // Remove default padding
+        // Radio button selector for number of dice using RadioGroup
+        RadioGroup<int>(
+          groupValue: _selectedDiceCount,
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _selectedDiceCount = value;
+              _totalDiceCount = _selectedDiceCount;
+              _currentDiceRolls = List.generate(value, (_) => 1);
+            });
+          },
+          child: Material(
+            color: Colors
+                .transparent, // Make the material transparent to show the gradient
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                children: [
+                  // Radio button for 1 die
+                  Flexible(
+                    child: RadioListTile<int>(
+                      title: Text('1 Die',
+                          style: TextStyle(color: Colors.white)),
+                      value: 1,
+                      fillColor: WidgetStatePropertyAll(Colors.white),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
-                // Radio button for 2 dice
-                Flexible(
-                  child: RadioListTile<int>(
-                    title: const Text('2 Dice',
-                        style: TextStyle(color: Colors.white)),
-                    value: 2,
-                    groupValue: _selectedDiceCount,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedDiceCount = value!;
-                        _totalDiceCount = _selectedDiceCount;
-                        _currentDiceRolls = [
-                          1,
-                          1
-                        ]; // Reset to 2 dice when count changes
-                      });
-                    },
-                    activeColor: Colors.white,
-                    contentPadding: EdgeInsets.zero,
+                  // Radio button for 2 dice
+                  Flexible(
+                    child: RadioListTile<int>(
+                      title: Text('2 Dice',
+                          style: TextStyle(color: Colors.white)),
+                      value: 2,
+                      fillColor: WidgetStatePropertyAll(Colors.white),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
-                // Radio button for 3 dice
-                Flexible(
-                  child: RadioListTile<int>(
-                    title: const Text('3 Dice',
-                        style: TextStyle(color: Colors.white)),
-                    value: 3,
-                    groupValue: _selectedDiceCount,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedDiceCount = value!;
-                        _totalDiceCount = _selectedDiceCount;
-                        _currentDiceRolls = [
-                          1,
-                          1,
-                          1
-                        ]; // Reset to 3 dice when count changes
-                      });
-                    },
-                    activeColor: Colors.white,
-                    contentPadding: EdgeInsets.zero,
+                  // Radio button for 3 dice
+                  Flexible(
+                    child: RadioListTile<int>(
+                      title: Text('3 Dice',
+                          style: TextStyle(color: Colors.white)),
+                      value: 3,
+                      fillColor: WidgetStatePropertyAll(Colors.white),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

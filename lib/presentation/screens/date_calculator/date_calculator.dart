@@ -19,6 +19,7 @@ class _DateCalculatorScreenState extends State<DateCalculatorScreen> {
       firstDate: now,
       lastDate: DateTime(2100),
       helpText: 'Select a future date',
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
     );
 
     if (picked != null) {
@@ -76,11 +77,11 @@ class _DateCalculatorScreenState extends State<DateCalculatorScreen> {
                   icon: Icons.today,
                   color: theme.colorScheme.primary,
                 ),
-      
+
                 const SizedBox(height: 16),
                 const Icon(Icons.arrow_downward, size: 32, color: Colors.grey),
                 const SizedBox(height: 16),
-      
+
                 // Future date card (tappable)
                 GestureDetector(
                   onTap: _pickFutureDate,
@@ -92,9 +93,9 @@ class _DateCalculatorScreenState extends State<DateCalculatorScreen> {
                     placeholder: 'Tap to select a date',
                   ),
                 ),
-      
+
                 const SizedBox(height: 32),
-      
+
                 // Result
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
@@ -141,9 +142,9 @@ class _DateCalculatorScreenState extends State<DateCalculatorScreen> {
                           ),
                         ),
                 ),
-      
+
                 const SizedBox(height: 24),
-      
+
                 // Pick date button
                 FilledButton.icon(
                   onPressed: _pickFutureDate,
