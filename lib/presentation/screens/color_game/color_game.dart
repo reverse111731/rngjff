@@ -199,16 +199,7 @@ class _ColorRollerState extends State<ColorRoller> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // Title banner
-        const Text(
-          'COLOR GAME',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 3.0,
-            color: Colors.white70,
-          ),
-        ),
+        const _ColorOptionsGuide(),
 
         // Radio button selector for number of dice using RadioGroup
         RadioGroup<int>(
@@ -292,13 +283,12 @@ class _ColorRollerState extends State<ColorRoller> {
         ),
 
         // Display the color dice
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 12,
           children: _currentRolls.map((gameColor) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6.0),
-              child: _ColorDieWidget(gameColor: gameColor),
-            );
+            return _ColorDieWidget(gameColor: gameColor);
           }).toList(),
         ),
 
@@ -331,6 +321,71 @@ class _ColorRollerState extends State<ColorRoller> {
   }
 }
 
+class _ColorOptionsGuide extends StatelessWidget {
+  const _ColorOptionsGuide();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'COLOR OPTIONS',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (var row = 0; row < 2; row++)
+          Padding(
+            padding: EdgeInsets.only(top: row == 0 ? 0 : 8),
+            child: Row(
+              children: GameColor.values
+                  .skip(row * 3)
+                  .take(3)
+                  .map(
+                    (gameColor) => Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: gameColor.color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: gameColor.borderColor,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              gameColor.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// A 3D-styled dice block displaying a GameColor
 class _ColorDieWidget extends StatelessWidget {
   const _ColorDieWidget({required this.gameColor});
@@ -340,27 +395,27 @@ class _ColorDieWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 95,
-      height: 95,
+      width: 142.5,
+      height: 142.5,
       decoration: BoxDecoration(
         color: gameColor.color,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(27),
         border: Border.all(
           color: gameColor.borderColor.withValues(alpha: 0.8),
-          width: 3.0,
+          width: 4.5,
         ),
         boxShadow: [
           // Bottom drop shadow for 3D depth
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+            blurRadius: 15,
+            offset: const Offset(0, 9),
           ),
           // Inner/outer ambient glow
           BoxShadow(
             color: gameColor.color.withValues(alpha: 0.35),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+            blurRadius: 18,
+            offset: const Offset(0, 3),
           ),
         ],
         gradient: LinearGradient(
@@ -378,18 +433,18 @@ class _ColorDieWidget extends StatelessWidget {
       ),
       child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             gameColor.name.toUpperCase(),
             style: TextStyle(
               color: gameColor.textColor,
-              fontSize: 13,
+              fontSize: 19.5,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
+              letterSpacing: 1.8,
             ),
           ),
         ),

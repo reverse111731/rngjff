@@ -3,7 +3,7 @@ description: "RNG just for fun"
 publish_to: 'none' 
 
 
-version: 6.0.0+18
+version: 6.0.0+19
 
 environment:
   sdk: '>=3.5.4 <4.0.0'
@@ -24,10 +24,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/dice-1.png
-    - assets/images/dice-2.png
-    - assets/images/dice-3.png
-    - assets/images/dice-4.png
-    - assets/images/dice-5.png
-    - assets/images/dice-6.png
