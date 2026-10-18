@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-
-// Alignment constants for the gradient background
-const _startAlignment = Alignment.topLeft;
-const _endAlignment = Alignment.bottomRight;
+import '../common_util/game_screen_layout.dart';
 
 /// Six possible colors in the Color Game
 enum GameColor {
@@ -59,7 +56,7 @@ enum GameColor {
 }
 
 /// ColorGameScreen widget providing a gradient background and game body
-class ColorGameScreen extends StatelessWidget {
+class ColorGameScreen extends StatefulWidget {
   const ColorGameScreen({
     this.color1 = const Color(0xFF1A1A2E),
     this.color2 = const Color(0xFF16213E),
@@ -70,19 +67,29 @@ class ColorGameScreen extends StatelessWidget {
   final Color color2;
 
   @override
+  State<ColorGameScreen> createState() => _ColorGameScreenState();
+}
+
+class _ColorGameScreenState extends State<ColorGameScreen> {
+  int _selectedDiceCount = 3;
+  bool _isRolling = false;
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: _startAlignment,
-              end: _endAlignment,
-              colors: [color1, color2],
-            ),
-          ),
-          child: const Center(child: ColorRoller()),
-        ),
+    return GameScreenScaffold(
+      title: 'Color Game',
+      color1: widget.color1,
+      color2: widget.color2,
+      selectedDiceCount: _selectedDiceCount,
+      isRolling: _isRolling,
+      onDiceCountChanged: (count) {
+        setState(() => _selectedDiceCount = count);
+      },
+      child: ColorRoller(
+        selectedDiceCount: _selectedDiceCount,
+        onRollingChanged: (isRolling) {
+          setState(() => _isRolling = isRolling);
+        },
       ),
     );
   }
@@ -99,7 +106,14 @@ class ColorGame extends ColorGameScreen {
 
 /// ColorRoller StatefulWidget managing the state of the color dice and rolls
 class ColorRoller extends StatefulWidget {
-  const ColorRoller({super.key});
+  const ColorRoller({
+    required this.selectedDiceCount,
+    required this.onRollingChanged,
+    super.key,
+  });
+
+  final int selectedDiceCount;
+  final ValueChanged<bool> onRollingChanged;
 
   @override
   State<ColorRoller> createState() => _ColorRollerState();
@@ -110,8 +124,7 @@ class _ColorRollerState extends State<ColorRoller> {
   Timer? _rollTimer;
   bool _isRolling = false;
 
-  // Selected number of dice (1, 2, or 3)
-  int _selectedDiceCount = 3;
+  int _resultRevision = 0;
 
   // Current rolled colors for each die
   List<GameColor> _currentRolls = [
@@ -124,6 +137,22 @@ class _ColorRollerState extends State<ColorRoller> {
   void dispose() {
     _rollTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ColorRoller oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedDiceCount != widget.selectedDiceCount) {
+      _currentRolls = List.generate(
+        widget.selectedDiceCount,
+        (index) => [
+          GameColor.yellow,
+          GameColor.white,
+          GameColor.pink,
+        ][index],
+      );
+      _resultRevision++;
+    }
   }
 
   // Generate random colors for the active dice
@@ -140,7 +169,9 @@ class _ColorRollerState extends State<ColorRoller> {
 
     setState(() {
       _isRolling = true;
+      _resultRevision++;
     });
+    widget.onRollingChanged(true);
 
     int ticks = 0;
     const maxTicks = 8;
@@ -152,14 +183,16 @@ class _ColorRollerState extends State<ColorRoller> {
         timer.cancel();
         if (mounted) {
           setState(() {
-            _currentRolls = _generateRandomRolls(_selectedDiceCount);
+            _currentRolls = _generateRandomRolls(widget.selectedDiceCount);
             _isRolling = false;
+            _resultRevision++;
           });
+          widget.onRollingChanged(false);
         }
       } else {
         if (mounted) {
           setState(() {
-            _currentRolls = _generateRandomRolls(_selectedDiceCount);
+            _currentRolls = _generateRandomRolls(widget.selectedDiceCount);
           });
         }
       }
@@ -196,127 +229,21 @@ class _ColorRollerState extends State<ColorRoller> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        const _ColorOptionsGuide(),
-
-        // Radio button selector for number of dice using RadioGroup
-        RadioGroup<int>(
-          groupValue: _selectedDiceCount,
-          onChanged: (value) {
-            if (_isRolling || value == null) return;
-            setState(() {
-              _selectedDiceCount = value;
-              _currentRolls = List.generate(
-                value,
-                (index) => [
-                  GameColor.yellow,
-                  GameColor.white,
-                  GameColor.pink,
-                ][index],
-              );
-            });
-          },
-          child: Material(
-            color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                children: [
-                  // Radio button for 1 Die
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '1 Die',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 1,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  // Radio button for 2 Dice
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '2 Dice',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 2,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  // Radio button for 3 Dice
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '3 Dice',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 3,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Result summary text (e.g. "Yellow • White • Pink" or "Triple Red!")
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            _getResultSummary(),
-            key: ValueKey<String>(_getResultSummary()),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ),
-
-        // Display the color dice
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 12,
-          runSpacing: 12,
-          children: _currentRolls.map((gameColor) {
-            return _ColorDieWidget(gameColor: gameColor);
-          }).toList(),
-        ),
-
-        // Button to roll the colors
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            textStyle: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          onPressed: _rollAllDice,
-          child: Text(_isRolling ? 'Rolling...' : 'Roll Colors'),
-        ),
-
-        // Button to navigate back
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white70,
-            textStyle: const TextStyle(
-              fontSize: 20,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Go back to selection'),
-        ),
-      ],
+    return GameRollLayout(
+      header: const _ColorOptionsGuide(),
+      resultSummary: _getResultSummary(),
+      resultRevision: _resultRevision,
+      dice: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 12,
+        runSpacing: 12,
+        children: _currentRolls
+            .map((gameColor) => _ColorDieWidget(gameColor: gameColor))
+            .toList(),
+      ),
+      isRolling: _isRolling,
+      rollButtonLabel: 'Roll Colors',
+      onRoll: _rollAllDice,
     );
   }
 }

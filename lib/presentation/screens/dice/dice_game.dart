@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-
-// Alignment constants for the gradient background
-const _startAlignment = Alignment.topLeft;
-const _endAlignment = Alignment.bottomRight;
+import '../common_util/game_screen_layout.dart';
 
 /// GradientContainer widget that provides a dark gradient background
 /// for the dice game (similar to the color game's dark theme).
@@ -16,26 +13,20 @@ class GradientContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: _startAlignment,
-              end: _endAlignment,
-              colors: [color1, color2],
-            ),
-          ),
-          child: const Center(child: DiceRoller()),
-        ),
-      ),
-    );
+    return DiceRoller(color1: color1, color2: color2);
   }
 }
 
 /// DiceRoller StatefulWidget managing the state of the dice and their rolls.
 class DiceRoller extends StatefulWidget {
-  const DiceRoller({super.key});
+  const DiceRoller({
+    required this.color1,
+    required this.color2,
+    super.key,
+  });
+
+  final Color color1;
+  final Color color2;
 
   @override
   State<DiceRoller> createState() => _DiceRollerState();
@@ -49,6 +40,7 @@ class _DiceRollerState extends State<DiceRoller>
 
   // Selected number of dice (1, 2, or 3)
   int _selectedDiceCount = 1;
+  int _resultRevision = 0;
 
   // Current rolled values for each die
   List<int> _currentDiceRolls = [1];
@@ -81,8 +73,7 @@ class _DiceRollerState extends State<DiceRoller>
   }
 
   /// Total of all current dice values
-  int get _totalValue =>
-      _currentDiceRolls.fold(0, (sum, roll) => sum + roll);
+  int get _totalValue => _currentDiceRolls.fold(0, (sum, roll) => sum + roll);
 
   /// Generate random roll values for a given dice count
   List<int> _generateRandomRolls(int count) {
@@ -95,6 +86,7 @@ class _DiceRollerState extends State<DiceRoller>
 
     setState(() {
       _isRolling = true;
+      _resultRevision++;
     });
 
     int ticks = 0;
@@ -109,6 +101,7 @@ class _DiceRollerState extends State<DiceRoller>
           setState(() {
             _currentDiceRolls = _generateRandomRolls(_selectedDiceCount);
             _isRolling = false;
+            _resultRevision++;
           });
           // Trigger the bounce animation on the final result
           _bounceController.forward(from: 0.0);
@@ -150,150 +143,52 @@ class _DiceRollerState extends State<DiceRoller>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Title banner (matching color game style)
-        const Text(
-          'DICE GAME',
+    return GameScreenScaffold(
+      title: 'Dice Game',
+      color1: widget.color1,
+      color2: widget.color2,
+      selectedDiceCount: _selectedDiceCount,
+      isRolling: _isRolling,
+      onDiceCountChanged: (count) {
+        setState(() {
+          _selectedDiceCount = count;
+          _currentDiceRolls = List.generate(count, (_) => 1);
+          _resultRevision++;
+        });
+      },
+      child: GameRollLayout(
+        header: const Text(
+          'Choose 1–3 dice to roll',
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 3.0,
             color: Colors.white70,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
-
-        // Radio button selector for number of dice using RadioGroup
-        RadioGroup<int>(
-          groupValue: _selectedDiceCount,
-          onChanged: (value) {
-            if (_isRolling || value == null) return;
-            setState(() {
-              _selectedDiceCount = value;
-              _currentDiceRolls = List.generate(value, (_) => 1);
-            });
-          },
-          child: Material(
-            color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                children: [
-                  // Radio button for 1 Die
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '1 Die',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 1,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  // Radio button for 2 Dice
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '2 Dice',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 2,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  // Radio button for 3 Dice
-                  Flexible(
-                    child: RadioListTile<int>(
-                      title: Text(
-                        '3 Dice',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      value: 3,
-                      fillColor: WidgetStatePropertyAll(Colors.white),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Result summary with animated transitions
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            _getResultSummary(),
-            key: ValueKey<String>(_getResultSummary()),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ),
-
-        // Total value display
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
-          child: Text(
-            'Total: $_totalValue',
-            key: ValueKey<int>(_totalValue),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              color: Colors.white60,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-
-        // Display the 3D dice with bounce animation
-        ScaleTransition(
+        resultSummary: _getResultSummary(),
+        resultRevision: _resultRevision,
+        secondarySummary: 'Total: $_totalValue',
+        dice: ScaleTransition(
           scale: _bounceAnimation,
           child: Wrap(
             alignment: WrapAlignment.center,
             spacing: 12,
             runSpacing: 12,
-            children: _currentDiceRolls.asMap().entries.map((entry) {
-              return _DiceWidget(
-                value: entry.value,
-                isRolling: _isRolling,
-              );
-            }).toList(),
+            children: _currentDiceRolls
+                .map(
+                  (value) => _DiceWidget(
+                    value: value,
+                    isRolling: _isRolling,
+                  ),
+                )
+                .toList(),
           ),
         ),
-
-        // Roll button
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            textStyle: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          onPressed: _rollAllDice,
-          child: Text(_isRolling ? 'Rolling...' : 'Roll Dice'),
-        ),
-
-        // Button to navigate back
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white70,
-            textStyle: const TextStyle(
-              fontSize: 20,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Go back to selection'),
-        ),
-      ],
+        isRolling: _isRolling,
+        rollButtonLabel: 'Roll Dice',
+        onRoll: _rollAllDice,
+      ),
     );
   }
 }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class RouletteWheel extends StatelessWidget {
+class RouletteWheel extends StatefulWidget {
   const RouletteWheel({super.key});
 
+  @override
+  State<RouletteWheel> createState() => _RouletteWheelState();
+}
+
+class _RouletteWheelState extends State<RouletteWheel>
+    with SingleTickerProviderStateMixin {
   // The order of numbers on a single-zero roulette wheel
   final List<int> rouletteNumbers = const [
     0,
@@ -45,6 +51,57 @@ class RouletteWheel extends StatelessWidget {
     26
   ];
 
+  late final AnimationController _spinController;
+  final math.Random _random = math.Random.secure();
+  double _startRotation = 0;
+  double _targetRotation = 0;
+  int? _winningNumber;
+  bool _isSpinning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _spinController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _spinController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _spin() async {
+    if (_isSpinning) return;
+
+    final winningIndex = _random.nextInt(rouletteNumbers.length);
+    final segmentAngle = 2 * math.pi / rouletteNumbers.length;
+    final desiredRotation =
+        (2 * math.pi - ((winningIndex + 0.5) * segmentAngle)) % (2 * math.pi);
+    final currentRotation = _targetRotation;
+    final currentRotationModulo = currentRotation % (2 * math.pi);
+    final additionalRotation =
+        (desiredRotation - currentRotationModulo + 2 * math.pi) % (2 * math.pi);
+
+    setState(() {
+      _isSpinning = true;
+      _winningNumber = null;
+      _startRotation = currentRotation;
+      _targetRotation =
+          currentRotation + (6 * 2 * math.pi) + additionalRotation;
+    });
+
+    await _spinController.forward(from: 0);
+    if (!mounted) return;
+
+    setState(() {
+      _isSpinning = false;
+      _winningNumber = rouletteNumbers[winningIndex];
+    });
+  }
+
   // Function to determine the color of a number
   Color getPocketColor(int number) {
     if (number == 0) {
@@ -79,15 +136,121 @@ class RouletteWheel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: double.infinity,
-      child: CustomPaint(
-        painter: RouletteWheelPainter(
-          rouletteNumbers: rouletteNumbers,
-          getPocketColor: getPocketColor,
+    final winningNumberColor =
+        _winningNumber == null ? null : getPocketColor(_winningNumber!);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: _winningNumber == null
+              ? Text(
+                  _isSpinning ? 'Spinning...' : 'Tap SPIN to begin',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Winning number',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: winningNumberColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        _winningNumber.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
         ),
-      ),
+        Expanded(
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: _spinController,
+                      child: CustomPaint(
+                        painter: RouletteWheelPainter(
+                          rouletteNumbers: rouletteNumbers,
+                          getPocketColor: getPocketColor,
+                        ),
+                      ),
+                      builder: (context, child) {
+                        final progress = Curves.easeOutCubic
+                            .transform(_spinController.value);
+                        final rotation = _startRotation +
+                            (_targetRotation - _startRotation) * progress;
+                        return Transform.rotate(
+                          angle: rotation,
+                          child: child,
+                        );
+                      },
+                    ),
+                  ),
+                  const Positioned(
+                    top: -12,
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.amber,
+                      size: 52,
+                      shadows: [
+                        Shadow(color: Colors.black54, blurRadius: 4),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          child: SizedBox(
+            width: 180,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: _isSpinning ? null : _spin,
+              icon: const Icon(Icons.casino),
+              label: Text(_isSpinning ? 'SPINNING' : 'SPIN'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade900,
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
